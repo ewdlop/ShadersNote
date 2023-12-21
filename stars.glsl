@@ -1,5 +1,6 @@
 #define NUM_LAYERS 6.
 
+//2d rotation matrix
 mat2 Rot(float a) {
     float s = sin(a), c = cos(a);
     return mat2(c, -s, s, c);
@@ -14,7 +15,7 @@ float Star(vec2 uv, float flare){
     m += rays* flare;
     uv *= Rot(3.1415/4.);
     rays = max(0.,1.-abs(uv.x * uv.y * 1000.));
-    m += rays * .3 * flare;
+    m += rays * .3 * flare; //add another layer
     m*= smoothstep(1.,.2,d);
     return m;
 }
@@ -52,17 +53,17 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     // Normalized pixel coordinates (from -0.5 to 0.5)
     vec2 uv = (fragCoord -.5*iResolution.xy)/iResolution.y;
-    vec2 M = (iMouse.xy -.5*iResolution.xy)/iResolution.y;
+    vec2 M = (iMouse.xy -.5*iResolution.xy)/iResolution.y; //camera
     float t = iTime*.01;
     uv += M *4.;
     uv *= Rot(t);
     vec3 col = vec3(0);
     
     for(float i=0.; i<1.; i+=1./NUM_LAYERS) {
-        float depth = fract(i+t);
+        float depth = fract(i+t); //depth layer to simulate depth of 3d using layers
         float scale = mix(20.,.5,depth);
         float fade = depth* smoothstep(1.,.9,depth);
-        col += StarLayer(uv*scale+i*453.2-M)*fade;
+        col += StarLayer(uv*scale+i*453.2-M)*fade; //with parallax
     }
     
     //red grid
